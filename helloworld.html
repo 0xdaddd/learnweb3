@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My First dApp</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <style>
+    body {
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    div {
+      width: 20%;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    button {
+      width: 100%;
+      margin: 10px 0px 5px 0px;
+    }
+  </style>
+  </head>
+  <body>
+    <div>
+      <h1>This is my dApp!</h1>
+      <p>Here we can set or get the name:</p>
+      <label for="name">Input Name:</label> 
+      <input type="text" id="name" />
+      <button onclick="setName()">Set Name</button><br />
+      <label for="displayName">Display Name:</label> 
+      <input type="text" id="displayName"  />
+      <button type="" onclick="getName()">Get Name</button>
+    </div>
+    <script>
+    const contractAddress = "0x8378541a78E4B33eC24145Cd2F88142A1637dfD8";
+    const contractABI = [
+        {
+            "inputs": [],
+            "name": "get",
+            "outputs": [
+                {
+                    "internalType": "string",
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getBlockNumber",
+            "outputs": [
+                {
+                    "internalType": "uint256",
+                    "name": "",
+                    "type": "uint256"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [],
+            "name": "getSender",
+            "outputs": [
+                {
+                    "internalType": "address",
+                    "name": "",
+                    "type": "address"
+                }
+            ],
+            "stateMutability": "view",
+            "type": "function"
+        },
+        {
+            "inputs": [
+                {
+                    "internalType": "string",
+                    "name": "_name",
+                    "type": "string"
+                }
+            ],
+            "name": "set",
+            "outputs": [],
+            "stateMutability": "nonpayable",
+            "type": "function"
+        }
+    ];
+    let HelloWorldContract;
+    let signer;
+
+    //Define an ethers provider
+    const provider = new ethers.providers.Web3Provider(window.ethereum, "goerli");
+    //Request access to the user's wallet and connect the signer to your metamask account (we use [0] as the default), and define the contract object using your contract address, ABI, and signer
+    provider.send("eth_requestAccounts", []).then(() => {
+      provider.listAccounts().then((accounts) => {
+        signer = provider.getSigner(accounts[0]);
+        HelloWorldContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+      });
+    });
+    //Create asynchronous functions to call your smart contract functions
+    async function getName() {
+      const getNamePromise = HelloWorldContract.get();
+      const name = await getNamePromise;
+      document.getElementById("displayName").value=name;
+      console.log(name);
+    }
+
+    async function setName() {
+      const name = document.getElementById("name").value;
+      const setNamePromise = HelloWorldContract.set(name);
+      await setNamePromise;
+    }
+
+
+</script>
+  </body>
+</html>
